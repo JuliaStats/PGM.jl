@@ -1,22 +1,25 @@
-.. PPDSL documentation master file, created by
-   sphinx-quickstart on Thu Mar 20 11:49:09 2014.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
 
-Welcome to PPDSL's documentation!
-=================================
+Probabilistic Programming DSL in Julia
+========================================
+
+This document proposes the design of *PPDSL*, a probabilistic programming framework implemented as a domain-specific language on top of Julia. This document discusses the design of basic language constructs for model specification, query, as well as directives to control algorithmic choices in inference.
+
 
 Contents:
 
 .. toctree::
    :maxdepth: 2
 
+   basics.rst
+   examples.rst
+   npbayes.rst
+   inference.rst
 
 
-Indices and tables
-==================
+.. Indices and tables
+.. ==================
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+.. * :ref:`genindex`
+.. * :ref:`modindex`
+.. * :ref:`search`
 
