@@ -1,4 +1,4 @@
-module PPDSL
+module OpenPP
 
 # package code goes here
 

@@ -1,7 +1,7 @@
 Basics
 =======
 
-*PPDSL* is a domain-specific language built on top of Julia using macros. The lanaguage consists of two parts: *model specification* and *query*. In particular, a *model specification* formalizes a probabilistic model, which involves declaring variables and specifying relations between them; while a *query* specifies *what is given* and *what is to be inferred*. 
+*OpenPP* is a domain-specific language built on top of Julia using macros. The lanaguage consists of two parts: *model specification* and *query*. In particular, a *model specification* formalizes a probabilistic model, which involves declaring variables and specifying relations between them; while a *query* specifies *what is given* and *what is to be inferred*. 
 
 Terminologies
 --------------

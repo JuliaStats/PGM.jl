@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
-# PPDSL documentation build configuration file, created by
-# sphinx-quickstart on Thu Mar 20 11:49:09 2014.
+# OpenPP documentation build configuration file, created by
+# sphinx-quickstart on Thu Mar 20 12:25:02 2014.
 #
 # This file is execfile()d with the current directory set to its containing dir.
 #
@@ -40,8 +40,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'PPDSL'
-copyright = u'2014, Dahua Lin'
+project = u'OpenPP'
+copyright = u'2014, All contributors'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -164,7 +164,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'PPDSLdoc'
+htmlhelp_basename = 'OpenPPdoc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -183,8 +183,8 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'PPDSL.tex', u'PPDSL Documentation',
-   u'Dahua Lin', 'manual'),
+  ('index', 'OpenPP.tex', u'OpenPP Documentation',
+   u'All contributors', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -213,8 +213,8 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'ppdsl', u'PPDSL Documentation',
-     [u'Dahua Lin'], 1)
+    ('index', 'openpp', u'OpenPP Documentation',
+     [u'All contributors'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -227,8 +227,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'PPDSL', u'PPDSL Documentation',
-   u'Dahua Lin', 'PPDSL', 'One line description of project.',
+  ('index', 'OpenPP', u'OpenPP Documentation',
+   u'All contributors', 'OpenPP', 'One line description of project.',
    'Miscellaneous'),
 ]
 

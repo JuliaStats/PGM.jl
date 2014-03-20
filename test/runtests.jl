@@ -1,4 +1,4 @@
-using PPDSL
+using OpenPP
 using Base.Test  
 
 # write your own tests here
