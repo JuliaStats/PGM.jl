@@ -1,7 +1,7 @@
 Basics
 =======
 
-*OpenPP* is a domain-specific language built on top of Julia using macros. The lanaguage consists of two parts: *model specification* and *query*. In particular, a *model specification* formalizes a probabilistic model, which involves declaring variables and specifying relations between them; while a *query* specifies *what is given* and *what is to be inferred*. 
+*OpenPP* is a domain-specific language built on top of Julia using macros. The language consists of two parts: *model specification* and *query*. In particular, a *model specification* formalizes a probabilistic model, which involves declaring variables and specifying relations between them; while a *query* specifies *what is given* and *what is to be inferred*. 
 
 Terminologies
 --------------
@@ -36,7 +36,7 @@ Here is a list of terminologies that would be involved in the description.
 Getting Started: Gaussian Mixture Model
 ----------------------------------------
 
-Here, we take the *Gaussian Mixture Model* as an example to illustrate how we can specify a probabilistic model using this Julia domain-specific language (DSL). A *Gaussian Mixture Model* is a generative model that combines several Gaussian components to approximate complex distributions (e.g. those with multiple modals.). A Gaussian mixture model is characterized by a prior distrbution :math:`\pi` and a set of Gaussian component parameters :math:`(\mu_1, \Sigma_1), \ldots, (\mu_K, \Sigma_K)`. The generative process is described as follows:
+Here, we take the *Gaussian Mixture Model* as an example to illustrate how we can specify a probabilistic model using this Julia domain-specific language (DSL). A *Gaussian Mixture Model* is a generative model that combines several Gaussian components to approximate complex distributions (e.g. those with multiple modals.). A Gaussian mixture model is characterized by a prior distribution :math:`\pi` and a set of Gaussian component parameters :math:`(\mu_1, \Sigma_1), \ldots, (\mu_K, \Sigma_K)`. The generative process is described as follows:
 
     .. math::
     
