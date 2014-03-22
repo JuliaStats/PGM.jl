@@ -1,4 +1,4 @@
-using OpenPP
+using PGM
 using Base.Test  
 
 # write your own tests here

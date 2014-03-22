@@ -1,4 +1,4 @@
-module OpenPP
+module PGM
 
 # package code goes here
 

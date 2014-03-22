@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# OpenPP documentation build configuration file, created by
+# OpenPPL documentation build configuration file, created by
 # sphinx-quickstart on Thu Mar 20 12:25:02 2014.
 #
 # This file is execfile()d with the current directory set to its containing dir.
@@ -40,7 +40,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'OpenPP'
+project = u'OpenPPL'
 copyright = u'2014, All contributors'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -183,7 +183,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'OpenPP.tex', u'OpenPP Documentation',
+  ('index', 'OpenPPL.tex', u'OpenPPL Documentation',
    u'All contributors', 'manual'),
 ]
 
@@ -213,7 +213,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'openpp', u'OpenPP Documentation',
+    ('index', 'openpp', u'OpenPPL Documentation',
      [u'All contributors'], 1)
 ]
 
@@ -227,8 +227,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'OpenPP', u'OpenPP Documentation',
-   u'All contributors', 'OpenPP', 'One line description of project.',
+  ('index', 'OpenPPL', u'OpenPPL Documentation',
+   u'All contributors', 'OpenPPL', 'One line description of project.',
    'Miscellaneous'),
 ]
 
