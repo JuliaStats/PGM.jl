@@ -1,5 +1,6 @@
-using PGM
-using Base.Test  
+println("PGM.jl Unit Tests")
+println("==============================")
 
-# write your own tests here
-@test 1 == 1
+include("variables.jl")
+
+println()
