@@ -14,12 +14,20 @@ export
     DVar,
     RVar,
     VarList,
+    JointPMF,
 
     # functions
     indexof,
     dvar,
-    rvar
+    rvar,
+    nvars,
+    vars,
+    probs
 
+# sources
+
+include("utils.jl")
 include("variables.jl")
+include("discrete/jointpmf.jl")
 
 end # module
