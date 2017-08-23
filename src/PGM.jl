@@ -1,7 +1,7 @@
 module PGM
 
 import Base: ==, !=
-import Base: eltype, ndims, size, length, show, keys, values
+import Base: eltype, ndims, size, length, show, keys, values, parent
 import Base: getindex, eachindex, start, next, done
 
 export
@@ -20,14 +20,23 @@ export
     rvar,
 
     # graphs
+    Tree,
     UGraph,
 
     nvertices,
     nedges,
     vertices,
+    root,
+    isroot,
+    isleaf,
     edges,
     degree,
-    adjlist,
+    parent,
+    parent_linktype,
+    children,
+    children_linktypes,
+    neighbors,
+    neighbor_linktypes,
     simple_ugraph,
     ugraph_with_tedges,
 
