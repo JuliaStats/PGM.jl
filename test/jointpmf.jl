@@ -1,7 +1,9 @@
 using Base.Test
 using PGM
 
-@testset "JointPMF.Basics" begin
+@testset "JointPMF" begin
+
+@testset "Basics" begin
     p1 = rand(3, 4)
     g1 = JointPMF(["x", "y"], p1)
     @test isa(g1, JointPMF{Float64})
@@ -20,9 +22,9 @@ using PGM
     @test probs(g2) == p2
 end
 
-@testset "JointPMF.Marginal" begin
+@testset "Marginal" begin
     p = rand(3, 4, 5, 2)  # for x, y, z, w
-    p = p / sum(p)
+    p ./= sum(p)
     px = reshape(sum(p, (2, 3, 4)), 3)
     py = reshape(sum(p, (1, 3, 4)), 4)
     pz = reshape(sum(p, (1, 2, 4)), 5)
@@ -126,3 +128,57 @@ end
     @assert size(pywz) == (4, 2, 5)
     @test marginal(jp4, ("y", "w", "z")) ≈ pywz
 end
+
+@testset "Conditional" begin
+    p = rand(3, 4, 5)
+    p ./= sum(p)
+    jp = JointPMF(("x", "y", "z"), p)
+
+    p_x = sum(p, (2, 3))
+    p_y = sum(p, (1, 3))
+    p_z = sum(p, (1, 2))
+    p_xy = sum(p, 3)
+    p_xz = sum(p, 2)
+    p_yz = sum(p, 1)
+
+    # 1 | 0
+    @test conditional(jp, "x", ()) ≈ reshape(p_x, 3)
+    @test conditional(jp, "y", ()) ≈ reshape(p_y, 4)
+    @test conditional(jp, "z", ()) ≈ reshape(p_z, 5)
+
+    # 2 | 0
+    @test conditional(jp, ("x", "y"), ()) ≈ reshape(p_xy, (3, 4))
+    @test conditional(jp, ("x", "z"), ()) ≈ reshape(p_xz, (3, 5))
+    @test conditional(jp, ("y", "z"), ()) ≈ reshape(p_yz, (4, 5))
+    @test conditional(jp, ("z", "x"), ()) ≈ reshape(p_xz, (3, 5)).'
+
+    # 3 | 0
+    @test conditional(jp, ("x", "y", "z"), ()) == p
+    @test conditional(jp, ("y", "z", "x"), ()) == permutedims(p, (2, 3, 1))
+
+    # 1 | 1
+    @test conditional(jp, "x", "y") ≈ reshape(p_xy ./ p_y, (3, 4))
+    @test conditional(jp, "x", "z") ≈ reshape(p_xz ./ p_z, (3, 5))
+    @test conditional(jp, "y", "x") ≈ reshape(p_xy ./ p_x, (3, 4)).'
+    @test conditional(jp, "y", "z") ≈ reshape(p_yz ./ p_z, (4, 5))
+    @test conditional(jp, "z", "x") ≈ reshape(p_xz ./ p_x, (3, 5)).'
+    @test conditional(jp, "z", "y") ≈ reshape(p_yz ./ p_y, (4, 5)).'
+
+    # 2 | 1
+    @test conditional(jp, ("x", "y"), "z") ≈ p ./ p_z
+    @test conditional(jp, ("y", "x"), "z") ≈ permutedims(p ./ p_z, (2, 1, 3))
+    @test conditional(jp, ("x", "z"), "y") ≈ permutedims(p ./ p_y, (1, 3, 2))
+    @test conditional(jp, ("z", "x"), "y") ≈ permutedims(p ./ p_y, (3, 1, 2))
+    @test conditional(jp, ("y", "z"), "x") ≈ permutedims(p ./ p_x, (2, 3, 1))
+    @test conditional(jp, ("z", "y"), "x") ≈ permutedims(p ./ p_x, (3, 2, 1))
+
+    # 1 | 2
+    @test conditional(jp, "x", ("y", "z")) ≈ p ./ p_yz
+    @test conditional(jp, "x", ("z", "y")) ≈ permutedims(p ./ p_yz, (1, 3, 2))
+    @test conditional(jp, "y", ("x", "z")) ≈ permutedims(p ./ p_xz, (2, 1, 3))
+    @test conditional(jp, "y", ("z", "x")) ≈ permutedims(p ./ p_xz, (2, 3, 1))
+    @test conditional(jp, "z", ("x", "y")) ≈ permutedims(p ./ p_xy, (3, 1, 2))
+    @test conditional(jp, "z", ("y", "x")) ≈ permutedims(p ./ p_xy, (3, 2, 1))
+end
+
+end # JointPMF

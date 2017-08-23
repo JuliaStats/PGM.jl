@@ -58,7 +58,7 @@ end
 function marginal_i{T}(jp::JointPMF{T}, vidx::Int)
     if nvars(jp) == 1
         vidx == 1 || throw(BoundsError("Variable index out of range."))
-        return probs(jp)::Vector{T}
+        return copy(probs(jp))::Vector{T}
     else
         reduc_region = Utils.range_rm(nvars(jp), vidx)
         _mp = sum(probs(jp), reduc_region)
@@ -70,24 +70,45 @@ function marginal_i{T}(jp::JointPMF{T}, vinds)
     @assert !isa(vinds, Int)
     !isempty(vinds) || throw(ArgumentError("Input indices are empty."))
 
+    # process the case for single variable
     if length(vinds) == 1
         return marginal_i(jp, first(vinds))
     end
 
+    # marginalize out unspecified variables
     vinds_ = collect(vinds)::Vector{Int}
     reduc_region = Utils.range_rm(nvars(jp), vinds_)
     if isempty(reduc_region)
-        mp = probs(jp)
+        # no remaining variables, just keep p
+        mp = copy(probs(jp))
     else
         s_vinds = issorted(vinds_) ? vinds_ : sort(vinds_)
+        # reduce along unspecified dimensions
         _mp = sum(probs(jp), reduc_region)
+        # squeeze out reduced dimensions
         rsiz = ntuple(i->size(_mp, s_vinds[i]), length(s_vinds))
         mp = reshape(_mp, rsiz)
     end
-    return issorted(vinds)    ? mp :
-           length(vinds) == 2 ? transpose(mp) :
-                                permutedims(mp, Utils.isortperm(vinds_))
+    # make output, permute dimensions according to specified order
+    issorted(vinds)    ? mp :
+    length(vinds) == 2 ? transpose(mp) :
+                         permutedims(mp, Utils.isortperm(vinds_))
 end
 
-marginal(jp::JointPMF, vid::String) = marginal_i(jp, indexof(vid, vars(jp)))
-marginal(jp::JointPMF, vids) = marginal_i(jp, Int[indexof(v, vars(jp)) for v in vids])
+marginal(jp::JointPMF, vids) = marginal_i(jp, indexof(vids, vars(jp)))
+
+function conditional_i(jp::JointPMF, vinds, cinds)
+    # no conditions, degenerate to marginal distribution
+    if isempty(cinds)
+        return marginal_i(jp, vinds)
+    end
+
+    # compute the marginal of both targets and conditions
+    mp = marginal_i(jp, Int[vinds..., cinds...])
+
+    # obtain the conditional probabilities
+    mp ./= sum(mp, 1:length(vinds))
+end
+
+conditional(jp::JointPMF, vs, cs) =
+    conditional_i(jp, indexof(vs, vars(jp)), indexof(cs, vars(jp)))

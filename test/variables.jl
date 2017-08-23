@@ -1,6 +1,8 @@
 using Base.Test
 using PGM
 
+@testset "Variables" begin
+
 @testset "ValueSpace" begin
     @test RealSpace <: ValueSpace
     @test FiniteSpace <: ValueSpace
@@ -113,3 +115,5 @@ end
 
     @test_throws KeyError VarList([x, x])
 end
+
+end # Variables

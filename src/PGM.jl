@@ -24,7 +24,8 @@ export
     vars,
     probs,
     marginal_i,
-    marginal
+    marginal,
+    conditional
 
 # sources
 
