@@ -5,5 +5,6 @@ include("utils.jl")
 include("variables.jl")
 include("graphs.jl")
 include("jointpmf.jl")
+include("dmrf.jl")
 
 println()
