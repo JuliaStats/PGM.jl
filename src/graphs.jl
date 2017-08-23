@@ -40,6 +40,7 @@ mutable struct Tree
 end
 
 nvertices(g::Tree) = g.nv
+nedgetypes(g::Tree) = g.nt
 nedges(g::Tree) = g.nv - 1
 
 parent(g::Tree, v::Int) = g.parents[v]
@@ -150,6 +151,7 @@ function ugraph_with_tedges(nv::Int, tedges)
 end
 
 nvertices(g::UGraph) = g.nv
+nedgetypes(g::UGraph) = g.nt
 nedges(g::UGraph) = g.ne
 nedges(g::UGraph, t::Int) = length(g.tlst[t])
 vertices(g::UGraph) = 1:g.nv
@@ -157,3 +159,55 @@ edges(g::UGraph, t::Int) = g.tlst[t]
 degree(g::UGraph, v::Int) = length(g.nbs[v])
 neighbors(g::UGraph, v::Int) = g.nbs[v]
 neighbor_linktypes(g::UGraph, v::Int) = g.nbs_lt[v]
+
+
+"""
+Convert a tree-structured undirected graph to an instance of Tree.
+
+# Arguments
+- g:  The input graph.
+- r:  The index of the root.
+
+It throws an ArgumentError if `g` is not a connected tree.
+"""
+function to_tree(g::UGraph, r::Int)
+    nv = nvertices(g)
+    0 < r <= nv || throw(BoundsError("Root index out of range."))
+    nedges(g) == nv - 1 || throw(
+        BoundsError("Unexpected number of edges for a tree."))
+
+    parents = collect(1:nv)
+    parents_lt = zeros(Int, nv)
+    visited = fill(false, nv)
+
+    # initialize the queue of active vertices
+    que = zeros(Int, nv)
+    que[1] = r
+    qf = 0
+    qr = 1
+    visited[r] = true
+
+    # main loop
+    while qf < qr       # non-empty queue
+        u = que[qf += 1]
+        p = parents[u]
+        for (v, t) in zip(neighbors(g, u), neighbor_linktypes(g, u))
+            if v != p
+                if visited[v]
+                    throw(ArgumentError("A cycle through $v is detected."))
+                end
+                # tag v as visited, and store its parent
+                visited[v] = true
+                parents[v] = u
+                parents_lt[v] = -t
+                # enqueue v as an active vertex
+                que[qr+=1] = v
+            end
+        end
+    end
+
+    if qr < nv
+        throw(ArgumentError("The input graph has disjoint components."))
+    end
+    Tree(nv, nedgetypes(g), parents, parents_lt)
+end

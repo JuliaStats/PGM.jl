@@ -25,6 +25,7 @@ export
 
     nvertices,
     nedges,
+    nedgetypes,
     vertices,
     root,
     isroot,
@@ -39,6 +40,7 @@ export
     neighbor_linktypes,
     simple_ugraph,
     ugraph_with_tedges,
+    to_tree,
 
     # discrete
     JointPMF,
