@@ -44,13 +44,25 @@ export
 
     # discrete
     JointPMF,
+    DiscretePairwiseMRF,
 
     nvars,
     vars,
     probs,
     marginal_i,
     marginal,
-    conditional
+    conditional,
+    pwmrf,
+    has_vertex_potentials,
+    has_edge_potentials,
+    set_vertex_potentials!,
+    set_edge_potentials!,
+    vertex_potentials,
+    edge_potentials,
+    var_cardinalities,
+    edge_pdims,
+    tpotential,
+    tpotentials
 
 # sources
 
@@ -59,5 +71,6 @@ include("variables.jl")
 include("graphs.jl")
 
 include("discrete/jointpmf.jl")
+include("discrete/dmrf.jl")
 
 end # module
