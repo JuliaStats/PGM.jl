@@ -143,6 +143,7 @@ next(vl::VarList, state) = next(vl.varlist, state)
 done(vl::VarList, state) = done(vl.varlist, state)
 
 indexof(id::String, vl::VarList) = vl.imap[id]
+indexof(ids, vl::VarList) = Int[indexof(id, vl) for id in ids]
 
 function show{V}(io::IO, vl::VarList{V})
     println(io, "VarList{$V} with $(length(vl)) variables:")

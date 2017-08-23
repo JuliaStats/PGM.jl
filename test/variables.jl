@@ -109,6 +109,7 @@ end
     @test indexof("y", vl) == 2
     @test indexof("z", vl) == 3
     @test_throws KeyError indexof("a", vl)
+    @test indexof(("z", "x"), vl) == [3, 1]
 
     @test_throws KeyError VarList([x, x])
 end
