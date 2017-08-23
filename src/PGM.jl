@@ -22,7 +22,9 @@ export
     rvar,
     nvars,
     vars,
-    probs
+    probs,
+    marginal_i,
+    marginal
 
 # sources
 

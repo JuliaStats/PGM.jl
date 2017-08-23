@@ -55,6 +55,39 @@ end
 #
 #################################################
 
-function marginal(jp::JointPMF, vidx::Int)
-
+function marginal_i{T}(jp::JointPMF{T}, vidx::Int)
+    if nvars(jp) == 1
+        vidx == 1 || throw(BoundsError("Variable index out of range."))
+        return probs(jp)::Vector{T}
+    else
+        reduc_region = Utils.range_rm(nvars(jp), vidx)
+        _mp = sum(probs(jp), reduc_region)
+        return reshape(_mp, size(_mp, vidx))::Vector{T}
+    end
 end
+
+function marginal_i{T}(jp::JointPMF{T}, vinds)
+    @assert !isa(vinds, Int)
+    !isempty(vinds) || throw(ArgumentError("Input indices are empty."))
+
+    if length(vinds) == 1
+        return marginal_i(jp, first(vinds))
+    end
+
+    vinds_ = collect(vinds)::Vector{Int}
+    reduc_region = Utils.range_rm(nvars(jp), vinds_)
+    if isempty(reduc_region)
+        mp = probs(jp)
+    else
+        s_vinds = issorted(vinds_) ? vinds_ : sort(vinds_)
+        _mp = sum(probs(jp), reduc_region)
+        rsiz = ntuple(i->size(_mp, s_vinds[i]), length(s_vinds))
+        mp = reshape(_mp, rsiz)
+    end
+    return issorted(vinds)    ? mp :
+           length(vinds) == 2 ? transpose(mp) :
+                                permutedims(mp, Utils.isortperm(vinds_))
+end
+
+marginal(jp::JointPMF, vid::String) = marginal_i(jp, indexof(vid, vars(jp)))
+marginal(jp::JointPMF, vids) = marginal_i(jp, Int[indexof(v, vars(jp)) for v in vids])

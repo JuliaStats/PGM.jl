@@ -105,5 +105,10 @@ end
     @test vl["y"] == y
     @test vl["z"] == z
 
+    @test indexof("x", vl) == 1
+    @test indexof("y", vl) == 2
+    @test indexof("z", vl) == 3
+    @test_throws KeyError indexof("a", vl)
+
     @test_throws KeyError VarList([x, x])
 end

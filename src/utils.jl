@@ -10,7 +10,7 @@ function range_rm(n::Int, s::Int)
     for i = (s+1):n
         r[i-1] = i
     end
-    return r
+    r
 end
 
 function range_rm(n::Int, s)
@@ -31,7 +31,14 @@ function range_rm(n::Int, s)
         end
     end
     @assert j == rlen + 1
-    return r
+    r
 end
 
+function isortperm(s)
+    n = length(s)
+    a = Vector{Int}(n)
+    a[sortperm(s)] = 1:n
+    a
 end
+
+end # Module Utils
