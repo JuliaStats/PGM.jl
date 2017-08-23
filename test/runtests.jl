@@ -3,6 +3,7 @@ println("==============================")
 
 include("utils.jl")
 include("variables.jl")
+include("graphs.jl")
 include("jointpmf.jl")
 
 println()

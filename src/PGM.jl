@@ -5,7 +5,7 @@ import Base: eltype, ndims, size, length, show, keys, values
 import Base: getindex, eachindex, start, next, done
 
 export
-    # classes
+    # variables
     ValueSpace,
     RealSpace,
     FiniteSpace,
@@ -14,12 +14,26 @@ export
     DVar,
     RVar,
     VarList,
-    JointPMF,
 
-    # functions
     indexof,
     dvar,
     rvar,
+
+    # graphs
+    UGraph,
+
+    nvertices,
+    nedges,
+    vertices,
+    edges,
+    degree,
+    adjlist,
+    simple_ugraph,
+    ugraph_with_tedges,
+
+    # discrete
+    JointPMF,
+
     nvars,
     vars,
     probs,
@@ -31,6 +45,8 @@ export
 
 include("utils.jl")
 include("variables.jl")
+include("graphs.jl")
+
 include("discrete/jointpmf.jl")
 
 end # module
