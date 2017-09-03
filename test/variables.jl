@@ -72,7 +72,7 @@ end
     x = dvar("x", 3)
     y = dvar("y", 4)
     z = dvar("z", 5)
-    vl = VarList([x, y, z])
+    vl = varlist([x, y, z])
 
     @test eltype(vl) == SVar
     @test ndims(vl) == 1
@@ -94,7 +94,7 @@ end
     @test_throws KeyError indexof("a", vl)
     @test indexof(("z", "x"), vl) == [3, 1]
 
-    @test_throws KeyError VarList([x, x])
+    @test_throws KeyError varlist([x, x])
 end
 
 end # Variables

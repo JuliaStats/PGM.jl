@@ -53,54 +53,8 @@ function show(io::IO, v::Var)
 end
 
 
-"""
-An ordered list of random variables.
+const VarList{N} = NamedList{Var{N}}
+const SVarList = VarList{0}
 
-An instance of `VarList` has the following features:
-- It ensures that all variables in the list have different ids.
-- A variable can be retrieved by id or index.
-"""
-struct VarList{V<:Var}
-    varlist::Array{V}
-    imap::Dict{String,Int}
-
-    function VarList{V}(vars) where V<:Var
-        varlist = V[]
-        imap = Dict{String,Int}()
-        for v::V in vars
-            if haskey(imap, v.id)
-                throw(KeyError("Duplicated variable id: $(v.id)."))
-            else
-                push!(varlist, v)
-                imap[v.id] = length(varlist)
-            end
-        end
-        new(varlist, imap)
-    end
-end
-
-const SVarList = VarList{SVar}
-
-VarList(vars) = VarList{eltype(vars)}(vars)
-
-eltype{V}(vl::VarList{V}) = V
-ndims(vl::VarList) = 1
-length(vl::VarList) = length(vl.varlist)
-size(vl::VarList) = (length(vl),)
-getindex(vl::VarList, i::Int) = vl.varlist[i]
-getindex(vl::VarList, id::String) = vl.varlist[vl.imap[id]]
-
-eachindex(vl::VarList) = eachindex(vl.varlist)
-start(vl::VarList) = start(vl.varlist)
-next(vl::VarList, state) = next(vl.varlist, state)
-done(vl::VarList, state) = done(vl.varlist, state)
-
-indexof(id::String, vl::VarList) = vl.imap[id]
-indexof(ids, vl::VarList) = Int[indexof(id, vl) for id in ids]
-
-function show{V}(io::IO, vl::VarList{V})
-    println(io, "VarList{$V} with $(length(vl)) variables:")
-    for v in vl
-        println(io, v)
-    end
-end
+varlist{N}(vars::AbstractVector{Var{N}}) =
+    namedlist(vars, v->v.id)::VarList{N}

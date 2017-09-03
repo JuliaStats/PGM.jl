@@ -1,6 +1,12 @@
 
 const IntPair = Tuple{Int,Int}
 
+struct Edge
+    s::Int      # source index
+    t::Int      # target index
+    k::Int      # kind index
+end
+
 
 """
 Tree graph.
@@ -59,102 +65,153 @@ Undirected graph.
 """
 mutable struct UGraph
     nv::Int     # number of vertices
-    ne::Int     # number of undirected edges
-    nt::Int     # number of edge types
+    nk::Int     # number of edge kinds
 
-    # lists of neighbors for each vertex
-    nbs::Vector{Vector{Int}}
+    # edge list (grouped by kind)
+    elst::Vector{Edge}
+    elst_offs::Vector{Int}
 
-    # lists of neighbor (signed) link-types for each vertex
-    nbs_lt::Vector{Vector{Int}}
+    # concatenated list of incoming edge indices (grouped by vertices)
+    ies::Vector{Int}
+    ies_offs::Vector{Int}
 
-    # collected typed edge list
-    # each entry is a list of edges of the corresponding type
-    tlst::Vector{Vector{IntPair}}
-
-    function UGraph(nv::Int, ne::Int, nt::Int,
-                    nbs::Vector{Vector{Int}},
-                    nbs_lt::Vector{Vector{Int}},
-                    tlst::Vector{Vector{IntPair}})
-
-        @assert length(nbs) == nv
-        @assert length(nbs_lt) == nv
-        @assert length(tlst) == nt
-
-        @assert all(length(a) == length(a2) for (a, a2) in zip(nbs, nbs_lt))
-        @assert sum(length(a) for a in nbs) == 2 * ne
-        @assert sum(length(tl) for tl in tlst) == ne
-        new(nv, ne, nt, nbs, nbs_lt, tlst)
-    end
+    # concatenated list of outgoing edge indices (grouped by vertices)
+    oes::Vector{Int}
+    oes_offs::Vector{Int}
 end
 
 
 """
-Construct a simple undirected graph with only one edge type.
+Construct an undirected graph based on a grouped edge list.
+"""
+function UGraph(nv::Int, nk::Int, elst::Vector{Edge}, elst_offs::Vector{Int})
+    @assert length(elst_offs) == nk + 1
+
+    # prepare storage
+    ne = length(elst)
+    ies = Vector{Int}(ne)
+    ies_offs = Vector{Int}(nv + 1)
+    oes = Vector{Int}(ne)
+    oes_offs = Vector{Int}(nv + 1)
+
+    icnt = zeros(Int, nv)
+    ocnt = zeros(Int, nv)
+
+    # scan edges & store counts to icnt & ocnt
+    for e in elst:
+        0 <= e.s < nv || throw(BoundsError("Vertex index out of range."))
+        0 <= e.t < nv || throw(BoundsError("Vertex index ouf of range."))
+        icnt[e.t] += 1
+        ocnt[e.s] += 1
+    end
+
+    # compute section offsets
+    ies_offs[1] = oes_offs[1] = 0
+    cumsum!(view(ies_offs, 2:nv+1), icnt)
+    cumsum!(view(oes_offs, 2:nv+1), ocnt)
+    @assert ies_offs[nv + 1] == ne
+    @assert oes_offs[nv + 1] == ne
+
+    # fill in edge indices
+    fill!(icnt, 0)
+    fill!(ocnt, 0)
+    for (i, e) in enumerate(elst)
+        i_off = icnt[e.t]; icnt[e.t] += 1
+        o_off = ocnt[e.s]; ocnt[e.s] += 1
+        ies[1 + i_off] = i
+        oes[1 + o_off] = i
+    end
+
+    # construct & return
+    return UGraph(nv, nk, elst, elst_offs, ies, ies_offs, oes, oes_offs)
+end
+
+
+"""
+Construct an undirected graph with a list of edges (in vertex pairs).
 
 # Arguments
 
-- nv:     The number of edges.
-- edges:  A collection of edges, where eacn entry is a pair of vertices.
+- nv:       The number of vertices
+- edges:    The list of edges. Each element in a vertex pair.
+
+# Keyword arguments
+
+- shared_kind:   Whether all edges share the same kind. (default = `false`)
+                 When `true`, all edges share the same kind index `1`.
+                 When `false`, the `i`-th edge has the kind index `i`.
 """
-function simple_ugraph(nv::Int, edges)
+function UGraph(nv::Int, edges::AbstractVector{IntPair}; shared_kind::Bool=false)
     nv >= 0 || throw(ArgumentError("nv must be non-negative."))
-    edges_ = collect(edges)::Vector{IntPair}
-    ne = length(edges)
 
-    nbs = [Int[] for _ = 1:nv]
-    nbs_lt = [Int[] for _ = 1:nv]
-    for (u, v) in edges_
-        0 < u <= nv || throw(BoundsError("Vertex index out of range."))
-        0 < v <= nv || throw(BoundsError("Vertex index out of range."))
-        u == v && throw(BoundsError("(u, v) can not be the same."))
+    # make edge list
+    ne = len(edges)
+    nk = (shared_kind ? 1 : ne)
 
-        push!(nbs[u], v)
-        push!(nbs[v], u)
-        push!(nbs_lt[u], 1)
-        push!(nbs_lt[v], -1)
+    elst = Vector{Edge}(ne)
+    elst_offs = Vector{Int}(nk + 1)
+    if shared_kind
+        for (i, e) in enumerate(edges)
+            elst[i] = Edge(e[0], e[1], 1)
+        end
+        elst_offs[1] = 0
+        elst_offs[2] = ne
+    else
+        for (i, e) in enumerate(edges)
+            elst[i] = Edge(e[0], e[1], i)
+            elst_offs[i] = i
+        end
+        elst_offs[nk + 1] = ne
     end
-    UGraph(nv, ne, 1, nbs, nbs_lt, [edges_])
+
+    # construct
+    return UGraph(nv, nk, elst, elst_offs)
 end
 
 
 """
-Construct an undirected graph (with typed edges).
+Construct an undirected graph (with edges grouped by kinds).
 
 # Arguments
 
 - nv:      The number of vertices.
-- tedges:  A collection of typed edges. ``tedges[i]`` is the
-           list of the edges of the ``i``-th type.
+- egrps:   A list of edge groups. ``gedges[k]`` is the list of edges for
+           the `k`-th kind.
 """
-function ugraph_with_tedges(nv::Int, tedges)
+function UGraph{G}(nv::Int, egrps::AbstractVector{G}) where G<:AbstractVector{IntPair}
     nv >= 0 || throw(ArgumentError("nv must be non-negative."))
-    tlst = Vector{IntPair}[collect(tl) for tl in tedges]
 
-    ne = 0
-    nbs = [Int[] for _ = 1:nv]
-    nbs_lt = [Int[] for _ = 1:nv]
-    for (t, tl) in enumerate(tlst)
-        ne += length(tl)
-        for (u, v) in tl
-            0 < u <= nv || throw(BoundsError("Vertex index out of range."))
-            0 < v <= nv || throw(BoundsError("Vertex index out of range."))
-            u == v && throw(BoundsError("(u, v) can not be the same."))
-
-            push!(nbs[u], v)
-            push!(nbs[v], u)
-            push!(nbs_lt[u], t)
-            push!(nbs_lt[v], -t)
+    # make edge list
+    nk = length(egrps)
+    ne = sum(length(g) for g in gedges)
+    elst = Vector{Edge}(ne)
+    elst_offs = Vector{Int}(nk + 1)
+    i = 0
+    elst_offs[1] = 0
+    for (k, g) in enumerate(egrps)
+        for e in g
+            elst[i += 1] = Edge(e[0], e[1], k)
         end
+        elst_offs[k + 1] = elst_offs[k] + length(g)
     end
-    UGraph(nv, ne, length(tlst), nbs, nbs_lt, tlst)
+    @assert i == ne
+    @assert elst_offs[nk + 1] == ne
+
+    # construct
+    return UGraph(nv, nk, elst, elst_offs)
 end
 
+
 nvertices(g::UGraph) = g.nv
-nedgetypes(g::UGraph) = g.nt
-nedges(g::UGraph) = g.ne
-nedges(g::UGraph, t::Int) = length(g.tlst[t])
+nedgekinds(g::UGraph) = g.nk
+nedges(g::UGraph) = length(g.elst)
+
 vertices(g::UGraph) = 1:g.nv
+edges(g::UGraph) = g.elst
+
+degree_of(g::UGraph, v::Int) = g.elst_offs[v + 1] - g.elst_offs[v]
+
+
 edges(g::UGraph, t::Int) = g.tlst[t]
 degree(g::UGraph, v::Int) = length(g.nbs[v])
 neighbors(g::UGraph, v::Int) = g.nbs[v]
