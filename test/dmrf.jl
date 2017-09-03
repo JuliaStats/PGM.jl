@@ -5,12 +5,12 @@ using PGM
 
 @testset "DPMRF.Basics" begin
 
-    vlst = VarList([dvar("x1", 1:3),
-                    dvar("x2", 1:3),
-                    dvar("x3", 1:2),
-                    dvar("x4", 1:2),
-                    dvar("x5", 1:3),
-                    dvar("x6", 1:3)])
+    vlst = VarList([dvar("x1", 3),
+                    dvar("x2", 3),
+                    dvar("x3", 2),
+                    dvar("x4", 2),
+                    dvar("x5", 3),
+                    dvar("x6", 3)])
     elists = [[(1, 2), (5, 6)],
               [(3, 4)],
               [(1, 3), (2, 4), (5, 3), (6, 4)]]
@@ -56,12 +56,12 @@ end
 
 @testset "DPMRF.Potentials" begin
 
-    vlst = VarList([dvar("x1", 1:3),
-                    dvar("x2", 1:3),
-                    dvar("x3", 1:2),
-                    dvar("x4", 1:2),
-                    dvar("x5", 1:3),
-                    dvar("x6", 1:3)])
+    vlst = VarList([dvar("x1", 3),
+                    dvar("x2", 3),
+                    dvar("x3", 2),
+                    dvar("x4", 2),
+                    dvar("x5", 3),
+                    dvar("x6", 3)])
     elists = [[(1, 2), (5, 6)],
               [(3, 4)],
               [(1, 3), (2, 4), (5, 3), (6, 4)]]

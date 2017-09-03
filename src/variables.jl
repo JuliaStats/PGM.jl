@@ -1,60 +1,11 @@
 
-"""
-The base type for underlying value spaces of random variables.
-"""
-abstract type ValueSpace
-end
-
-==(s1::ValueSpace, s2::ValueSpace) = false
-!=(s1::ValueSpace, s2::ValueSpace) = !(s1 == s2)
-
-"""
-Real value space
-"""
-struct RealSpace <: ValueSpace
-end
-
-==(s1::RealSpace, s2::RealSpace) = true
-
-show(io::IO, s::RealSpace) = print(io, "RealSpace")
-
-"""
-Finite value space.
-
-With a finite space, a variable can only take values from a finite set.
-
-A finite space comes with a ``size`` method:
-
-- ``length(s)``:        get the number of distinct values.
-- ``values(s)``:        get a collection of contained values.
-- ``indexof(x, s)``:    get the index of `x` in the space.
-"""
-abstract type FiniteSpace <: ValueSpace
-end
-
-struct RangeSpace <: FiniteSpace
-    values::UnitRange{Int}
-end
-
-values(s::RangeSpace) = s.values
-length(s::RangeSpace) = length(s.values)
-
-function indexof(x::Int, s::RangeSpace)
-    x in s.values || throw(ArgumentError("Value not in range."))
-    x - first(s.values) + 1
-end
-
-==(s1::RangeSpace, s2::RangeSpace) = (s1.values == s2.values)
-
-show(io::IO, s::RangeSpace) = print(io, "RangeSpace($(s.values))")
+@enum VType realv intv
 
 """
 Random variable.
 
-``Var`` is a parametric type with two type parameters:
-
-- ``S``: The underlying value space.
-- ``N``: The number of dimensions.
+``Var`` is a parametric type with a type parameter N, which indicates
+the number of dimensions for each sample.
 
 Each instance of ``Var`` represents a random variable that can take
 different values in different trials. The instance contains four
@@ -67,38 +18,38 @@ public fields:
 - ``len::Int``:         The number of elements in each sample
                         (i.e. ``prod(size)``).
 """
-struct Var{S<:ValueSpace,N}
-    id::String
-    space::S
-    dims::Dims{N}
-    len::Int
-
-    function Var{S,N}(id::String, s::S, dims::Dims{N}) where {S<:ValueSpace,N}
-        new(id, s, dims, prod(dims))
-    end
+mutable struct Var{N}
+    id::String          # identifier
+    vtype::VType        # variable type (realv or intv)
+    card::Int           # cardinality (0 when it is infinity)
+    dims::Dims{N}       # dimensions for each sample
+    len::Int            # number of elements of each sample
 end
 
-const DVar{N} = Var{RangeSpace, N}
-const RVar{N} = Var{RealSpace, N}
+"""Scalar random variable."""
+const SVar = Var{0}
 
-Var{S<:ValueSpace,N}(id::String, s::S, dims::Dims{N}) = Var{S,N}(id, s, dims)
+dvar(id::String, c::Int) = Var{0}(id, intv, c, (), 1)
+dvar(id::String, c::Int, n::Int) = Var{1}(id, intv, c, (n,), n)
+dvar{N}(id::String, c::Int, dims::Dims{N}) = Var{N}(id, intv, c, dims, prod(dims))
 
-dvar(id::String, rgn::UnitRange{Int}) = Var(id, RangeSpace(rgn), ())
-dvar(id::String, rgn::UnitRange{Int}, n::Int) = Var(id, RangeSpace(rgn), (n,))
-dvar(id::String, rgn::UnitRange{Int}, dims::Dims) = Var(id, RangeSpace(rgn), dims)
-rvar(id::String) = Var(id, RealSpace(), ())
-rvar(id::String, n::Int) = Var(id, RealSpace(), (n,))
-rvar(id::String, dims::Dims) = Var(id, RealSpace(), dims)
+rvar(id::String) = Var{0}(id, realv, 0, (), 1)
+rvar(id::String, n::Int) = Var{1}(id, realv, 0, (n,), n)
+rvar{N}(id::String, dims::Dims{N}) = Var{N}(id, realv, 0, dims, prod(dims))
 
-ndims{S,N}(v::Var{S,N}) = N
+ndims{N}(v::Var{N}) = N
 size(v::Var) = v.dims
 length(v::Var) = v.len
+vtype(v::Var) = v.vtype
+cardinality(v::Var) = v.card
 
-==(x::Var, y::Var) = (x.id == y.id && x.space == y.space && x.dims == y.dims)
+==(x::Var, y::Var) = false
+=={N}(x::Var{N}, y::Var{N}) =
+    (x.id == y.id && x.vtype == y.vtype && x.card == y.card && x.dims == y.dims)
 !=(x::Var, y::Var) = !(x == y)
 
 function show(io::IO, v::Var)
-    print(io, "Var($(v.id))[space=$(v.space), dims=$(v.dims)]")
+    print(io, "Var($(v.id))[vtype=$(v.vtype), dims=$(v.dims)]")
 end
 
 
@@ -127,6 +78,8 @@ struct VarList{V<:Var}
         new(varlist, imap)
     end
 end
+
+const SVarList = VarList{SVar}
 
 VarList(vars) = VarList{eltype(vars)}(vars)
 

@@ -9,16 +9,16 @@
 Joint finite distribution represented by probability mass function.
 """
 mutable struct JointPMF{T<:AbstractFloat}
-    varlist::VarList{DVar{0}}
+    varlist::SVarList
     p::Array{T}
 
-    function JointPMF{T}(vl::VarList{DVar{0}}, p::Array{T}) where T<:AbstractFloat
+    function JointPMF{T}(vl::SVarList, p::Array{T}) where T<:AbstractFloat
         nv = length(vl)
         ndims(p) == nv ||
             throw(DimensionMismatch(
                 "ndims(p) does not match the number of variables."))
         for i = 1:nv
-            size(p,i) == length(vl[i].space) ||
+            size(p,i) == cardinality(vl[i]) ||
                 throw(DimensionMismatch(
                     "size(p,i) does not match the corresponding space size."))
         end
@@ -26,15 +26,15 @@ mutable struct JointPMF{T<:AbstractFloat}
     end
 end
 
-JointPMF{T<:AbstractFloat}(vl::VarList{DVar{0}}, p::Array{T}) = JointPMF{T}(vl, p)
+JointPMF{T<:AbstractFloat}(vl::VarList{SVar}, p::Array{T}) = JointPMF{T}(vl, p)
 
 function JointPMF{T<:AbstractFloat}(vnames::Vector{String}, p::Array{T})
-    vlst = DVar{0}[dvar(v, 1:size(p,i)) for (i, v) in enumerate(vnames)]
+    vlst = SVar[dvar(v, size(p,i)) for (i, v) in enumerate(vnames)]
     JointPMF{T}(VarList(vlst), p)
 end
 
 function JointPMF{T<:AbstractFloat,N}(vnames::NTuple{N,String}, p::Array{T,N})
-    vlst = DVar{0}[dvar(v, 1:size(p,i)) for (i, v) in enumerate(vnames)]
+    vlst = SVar[dvar(v, size(p,i)) for (i, v) in enumerate(vnames)]
     JointPMF{T}(VarList(vlst), p)
 end
 

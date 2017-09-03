@@ -6,18 +6,18 @@ import Base: getindex, eachindex, start, next, done
 
 export
     # variables
-    ValueSpace,
-    RealSpace,
-    FiniteSpace,
-    RangeSpace,
+    VType,
     Var,
-    DVar,
-    RVar,
+    SVar,
     VarList,
 
-    indexof,
+    realv,
+    intv,
     dvar,
     rvar,
+    vtype,
+    cardinality,
+    indexof,
 
     # graphs
     Tree,

@@ -4,7 +4,7 @@
 Discrete pairwise Markov random field
 """
 mutable struct DiscretePairwiseMRF{T<:AbstractFloat}
-    varlist::VarList{DVar{0}}
+    varlist::SVarList
     gr::UGraph
     cards::Vector{Int}
     epdims::Vector{IntPair}
@@ -15,9 +15,7 @@ mutable struct DiscretePairwiseMRF{T<:AbstractFloat}
     # edge potentials: binary potentials associated with edge types
     epots::Vector{Matrix{T}}
 
-    function DiscretePairwiseMRF{T}(vs::VarList{DVar{0}},
-                                    gr::UGraph) where T<:AbstractFloat
-
+    function DiscretePairwiseMRF{T}(vs::SVarList, gr::UGraph) where T<:AbstractFloat
         nv = length(vs)
         nvertices(gr) == nv || throw(
             ArgumentError("nvertices(gr) does not match #variables."))
@@ -25,7 +23,7 @@ mutable struct DiscretePairwiseMRF{T<:AbstractFloat}
 
         cards = Vector{Int}(nv)
         for (i, v) in enumerate(vs)
-            cards[i] = length(v.space)
+            cards[i] = cardinality(v)
         end
 
         epdims = fill((0, 0), nt)
@@ -93,7 +91,7 @@ function set_edge_potentials!{T<:AbstractFloat}(mrf::DiscretePairwiseMRF{T},
     mrf.epots = epots
 end
 
-function pwmrf{T<:AbstractFloat}(vs::VarList{DVar{0}}, gr::UGraph,
+function pwmrf{T<:AbstractFloat}(vs::SVarList, gr::UGraph,
                                  vpots::Vector{Vector{T}},
                                  epots::Vector{Matrix{T}})
     mrf = DiscretePairwiseMRF{T}(vs, gr)
@@ -107,7 +105,6 @@ function tpotential{T<:AbstractFloat}(mrf::DiscretePairwiseMRF{T},
     nv = nvertices(mrf)
     nt = nedgetypes(mrf)
     length(x) == nv || throw(DimensionMismatch("Invalid sample dimension."))
-    xidx = Int[indexof(x[i], mrf.varlist[i].space) for i = 1:nv]
 
     # accumulate vertex potentials
     r1 = zero(T)
@@ -116,7 +113,7 @@ function tpotential{T<:AbstractFloat}(mrf::DiscretePairwiseMRF{T},
         for i = 1:nv
             vp = vpots[i]
             if !isempty(vp)
-                r1 += vp[xidx[i]]
+                r1 += vp[x[i]]
             end
         end
     end
@@ -131,7 +128,7 @@ function tpotential{T<:AbstractFloat}(mrf::DiscretePairwiseMRF{T},
                 r2t = zero(T)
                 es = edges(mrf, t)
                 for (u, v) in es
-                    r2t += ep[xidx[u], xidx[v]]
+                    r2t += ep[x[u], x[v]]
                 end
                 r2 += r2t
             end
