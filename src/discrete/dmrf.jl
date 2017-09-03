@@ -112,9 +112,8 @@ function tpotential{T<:AbstractFloat}(mrf::DiscretePairwiseMRF{T},
         vpots = vertex_potentials(mrf)
         for i = 1:nv
             vp = vpots[i]
-            if !isempty(vp)
-                r1 += vp[x[i]]
-            end
+            isempty(vp) && continue
+            r1 += vp[x[i]]
         end
     end
 
@@ -124,14 +123,13 @@ function tpotential{T<:AbstractFloat}(mrf::DiscretePairwiseMRF{T},
         epots = edge_potentials(mrf)
         for t = 1:nt
             ep = epots[t]
-            if !isempty(ep)
-                r2t = zero(T)
-                es = edges(mrf, t)
-                for (u, v) in es
-                    r2t += ep[x[u], x[v]]
-                end
-                r2 += r2t
+            isempty(ep) && continue
+            r2t = zero(T)
+            es = edges(mrf, t)
+            for (u, v) in es
+                r2t += ep[x[u], x[v]]
             end
+            r2 += r2t
         end
     end
 
