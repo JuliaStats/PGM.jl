@@ -18,6 +18,34 @@ function grlist_from_counts{T}(elems::Vector{T}, cnts::AbstractVector{Int})
     GroupedList{T}(ng, elems, offs)
 end
 
+"""Construct a grouped list by a group-index mapping function."""
+function grlist_by{T}(es::AbstractVector{T}, ng::Int, f::Function)
+    len = length(es)
+
+    elems = Vector{T}(len)
+    offs = Vector{Int}(ng + 1)
+    cnts = zeros(Int, ng)
+    for e in es
+        k = f(e)::Int
+        0 < k <= ng || throw(BoundsError("Group index out of bound."))
+        cnts[k] += 1
+    end
+
+    offs[1] = 0
+    for i = 1:ng
+        offs[i+1] = offs[i] + cnts[i]
+    end
+    @assert offs[ng + 1] == len
+
+    fill!(cnts, 0)
+    for e in es
+        k = f(e)::Int
+        elems[1 + offs[k] + cnts[k]] = e
+        cnts[k] += 1
+    end
+    GroupedList{T}(ng, elems, offs)
+end
+
 eltype{T}(gl::GroupedList{T}) = T
 length(gl::GroupedList) = length(gl.elems)
 ngroups(gl::GroupedList) = gl.ng

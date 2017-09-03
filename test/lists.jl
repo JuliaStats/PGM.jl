@@ -16,6 +16,7 @@ end
     @test eltype(gl0) == String
     @test length(gl0) == 0
     @test ngroups(gl0) == 1
+    @test collect(gl0) == String[]
     @test group_length(gl0, 1) == 0
     @test collect(group(gl0, 1)) == String[]
 
@@ -23,11 +24,23 @@ end
     @test eltype(gl1) == String
     @test length(gl1) == 6
     @test ngroups(gl1) == 4
+    @test collect(gl1) == ["a", "b", "c", "d", "e", "f"]
     @test [group_length(gl1, k) for k = 1:4] == [2, 1, 0, 3]
     @test collect(group(gl1, 1)) == ["a", "b"]
     @test collect(group(gl1, 2)) == ["c"]
     @test collect(group(gl1, 3)) == String[]
     @test collect(group(gl1, 4)) == ["d", "e", "f"]
+
+    gl2 = grlist_by([(10, 1), (20, 3), (30, 2), (40, 1), (50, 3), (60, 3)],
+                    3, v->v[2])
+    @test eltype(gl2) == Tuple{Int, Int}
+    @test length(gl2) == 6
+    @test ngroups(gl2) == 3
+    @test collect(gl2) == [(10, 1), (40, 1), (30, 2), (20, 3), (50, 3), (60, 3)]
+    @test [group_length(gl2, k) for k = 1:3] == [2, 1, 3]
+    @test collect(group(gl2, 1)) == [(10, 1), (40, 1)]
+    @test collect(group(gl2, 2)) == [(30, 2)]
+    @test collect(group(gl2, 3)) == [(20, 3), (50, 3), (60, 3)]
 end
 
 @testset "NamedList" begin

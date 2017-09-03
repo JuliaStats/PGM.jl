@@ -10,6 +10,7 @@ export
     NamedList,
 
     grlist_from_counts,
+    grlist_by,
     ngroups,
     group,
     group_length,
