@@ -1,6 +1,15 @@
 
 const IntPair = Tuple{Int,Int}
 
+"""
+Edge with a kind index.
+
+Each instance of ``Edge`` has three fields:
+
+- ``s``:  index of the source vertex.
+- ``t``:  index of the target vertex.
+- ``k``:  the kind index, which can be used to access external data.
+"""
 struct Edge
     s::Int      # source index
     t::Int      # target index
@@ -9,59 +18,6 @@ struct Edge
     Edge(s::Int, t::Int, k::Int) = new(s, t, k)
     Edge(e::IntPair, k::Int) = new(e[1], e[2], k)
 end
-
-
-# """
-# Tree graph.
-# """
-# mutable struct Tree
-#     nv::Int                             # number of vertices
-#     nt::Int                             # number of edge types
-#     root::Int                           # the root vertex
-#     parents::Vector{Int}                # parent vertices
-#     parents_lt::Vector{Int}             # parent-link types
-#     children::Vector{Vector{Int}}       # children vertices
-#     children_lt::Vector{Vector{Int}}    # children-link types
-#
-#     function Tree(nv::Int, nt::Int,
-#                   parents::Vector{Int}, parents_lt::Vector{Int})
-#
-#         @assert length(parents) == length(parents_lt) == nv
-#
-#         children = [Int[] for _ = 1:nv]
-#         children_lt = [Int[] for _ = 1:nv]
-#         root = 0
-#         for v = 1:nv
-#             p = parents[v]
-#             if p == v   # is-root
-#                 @assert root == 0
-#                 root = v
-#             else        # non-root
-#                 push!(children[p], v)
-#                 push!(children_lt[p], -parents_lt[v])
-#             end
-#         end
-#         @assert root > 0
-#         @assert(sum(length(a) for a in children) == nv-1)
-#
-#         new(nv, nt, root, parents, parents_lt, children, children_lt)
-#     end
-# end
-#
-# nvertices(g::Tree) = g.nv
-# nedgetypes(g::Tree) = g.nt
-# nedges(g::Tree) = g.nv - 1
-#
-# parent(g::Tree, v::Int) = g.parents[v]
-# parent_linktype(g::Tree, v::Int) = g.parents_lt[v]
-# children(g::Tree, v::Int) = g.children[v]
-# children_linktypes(g::Tree, v::Int) = g.children_lt[v]
-# degree(g::Tree, v::Int) = Int(g.root != v) + length(g.children[v])
-#
-# root(g::Tree) = g.root
-# isroot(g::Tree, v::Int) = (g.root == v)
-# isleaf(g::Tree, v::Int) = isempty(children(g, v))
-
 
 """
 Undirected graph.
@@ -101,14 +57,15 @@ Construct an undirected graph with a list of edges (in vertex pairs).
 
 # Arguments
 
-- nv:       The number of vertices
-- edges:    The list of edges. Each element in a vertex pair.
+- ``nv``:       The number of vertices
+- ``edges``:    The list of edges. Each element in a vertex pair.
 
 # Keyword arguments
 
-- shared_kind:   Whether all edges share the same kind. (default = `false`)
-                 When `true`, all edges share the same kind index `1`.
-                 When `false`, the `i`-th edge has the kind index `i`.
+- ``shared_kind``:   Whether all edges share the same kind (default = `false`).
+                     When `true`, all edges share the same kind index `1`;
+                     otherwise, they are assumed to have different kinds,
+                     *i.e.*, the kind index of the  `i`-th edge is `i`.
 """
 function UGraph(nv::Int, edges::AbstractVector{IntPair}; shared_kind::Bool=false)
     nv >= 0 || throw(ArgumentError("nv must be non-negative."))
@@ -138,12 +95,12 @@ end
 
 
 """
-Construct an undirected graph (with edges grouped by kinds).
+Construct an undirected graph with edges grouped by their kinds.
 
 # Arguments
 
 - nv:      The number of vertices.
-- egrps:   A list of edge groups. ``gedges[k]`` is the list of edges for
+- egrps:   A list of edge groups. `gedges[k]` is the list of edges for
            the `k`-th kind.
 """
 function UGraph{G<:AbstractVector{IntPair}}(nv::Int, egrps::AbstractVector{G})
